@@ -98,6 +98,8 @@ type (
 		Publish(exchange, key string, opts amqp.Publishing) error
 		// CreateConsumer creates a amqp consumer
 		CreateConsumer(exchange, key, kind, queue string, durable bool) (<-chan amqp.Delivery, error)
+		// Bind queue to an exchange and routing key
+		BindQueue(queue, exchange, key string) error
 		// WithExchange creates a amqp exchange
 		WithExchange(exchange, kind string, durable bool) error
 		// WithQos wrapper over amqp.Qos method

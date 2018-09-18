@@ -42,11 +42,22 @@ func (ai *Amqp) CreateConsumer(exchange, key, kind, queue string, durable bool) 
 		return nil, err
 	}
 
-	if err := ai.ch.QueueBind(q.Name, key, exchange, false, nil); err != nil {
+	if err := ai.BindQueue(q.Name, exchange, key); err != nil {
 		return nil, err
 	}
 
 	return ai.ch.Consume(q.Name, "", false, false, false, false, nil)
+}
+
+// BindQueue bind queue to a given exchange and routing key
+func (ai *Amqp) BindQueue(queue, exchange, key string) error {
+	ch, err := ai.conn.Channel()
+	if err != nil {
+		return err
+	}
+	defer ch.Close()
+
+	return ch.QueueBind(queue, key, exchange, false, nil)
 }
 
 // WithExchange creates a amqp exchange

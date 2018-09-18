@@ -451,6 +451,10 @@ func (m *amqpMock) CreateConsumer(exchange, key, kind, queue string, durable boo
 	return m.createConsumerFn(exchange, key, kind, queue, durable)
 }
 
+func (m *amqpMock) BindQueue(queue, exchange, key string) error {
+	return nil
+}
+
 func (m *amqpMock) WithExchange(exchange, kind string, durable bool) error {
 	m.withExchangeInvoked = true
 	return m.withExchangeFn(exchange, kind, durable)
