@@ -451,6 +451,10 @@ func (m *amqpMock) CreateConsumer(exchange, key, kind, queue string, durable boo
 	return m.createConsumerFn(exchange, key, kind, queue, durable)
 }
 
+func (m *amqpMock) Listen(queue string) (<-chan amqp.Delivery, error) {
+	return nil, nil
+}
+
 func (m *amqpMock) BindQueue(queue, exchange, key string) error {
 	return nil
 }

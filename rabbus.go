@@ -100,6 +100,8 @@ type (
 		CreateConsumer(exchange, key, kind, queue string, durable bool) (<-chan amqp.Delivery, error)
 		// Bind queue to an exchange and routing key
 		BindQueue(queue, exchange, key string) error
+		// Listen listen to messages to a given queue
+		Listen(queue string) (<-chan amqp.Delivery, error)
 		// WithExchange creates a amqp exchange
 		WithExchange(exchange, kind string, durable bool) error
 		// WithQos wrapper over amqp.Qos method

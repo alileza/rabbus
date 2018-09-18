@@ -60,6 +60,17 @@ func (ai *Amqp) BindQueue(queue, exchange, key string) error {
 	return ch.QueueBind(queue, key, exchange, false, nil)
 }
 
+// Listen listen to messages to a given queue
+func (ai *Amqp) Listen(queue string) (<-chan amqp.Delivery, error) {
+	ch, err := ai.conn.Channel()
+	if err != nil {
+		return nil, err
+	}
+	defer ch.Close()
+
+	return ch.Consume(queue, "", false, false, false, false, nil)
+}
+
 // WithExchange creates a amqp exchange
 func (ai *Amqp) WithExchange(exchange, kind string, durable bool) error {
 	if ai.passiveExchange {
