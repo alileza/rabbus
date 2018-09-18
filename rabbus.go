@@ -71,8 +71,16 @@ type (
 		PassiveExchange bool
 		// Queue the queue name
 		Queue string
+
+		Bindings []Binding
 	}
 
+	Binding struct {
+		// Exchange the exchange name.
+		Exchange string
+		// Key the routing key name.
+		Key string
+	}
 	// Delivery wraps amqp.Delivery struct
 	Delivery struct {
 		amqp.Delivery
@@ -100,6 +108,8 @@ type (
 		CreateConsumer(exchange, key, kind, queue string, durable bool) (<-chan amqp.Delivery, error)
 		// Bind queue to an exchange and routing key
 		BindQueue(queue, exchange, key string) error
+		// QueueDeclare declare a new queue
+		QueueDeclare(queue string, durable bool) (amqp.Queue, error)
 		// Listen listen to messages to a given queue
 		Listen(queue string) (<-chan amqp.Delivery, error)
 		// WithExchange creates a amqp exchange
@@ -241,7 +251,22 @@ func (r *Rabbus) Listen(c ListenConfig) (chan ConsumerMessage, error) {
 		return nil, err
 	}
 
-	msgs, err := r.CreateConsumer(c.Exchange, c.Key, c.Kind, c.Queue, r.config.durable)
+	q, err := r.QueueDeclare(c.Queue, r.config.durable)
+	if err != nil {
+		return nil, err
+	}
+
+	if c.Exchange != "" && c.Key != "" {
+		c.Bindings = append(c.Bindings, Binding{c.Exchange, c.Key})
+	}
+
+	for _, bindCfg := range c.Bindings {
+		if err := r.BindQueue(q.Name, bindCfg.Exchange, bindCfg.Key); err != nil {
+			return nil, err
+		}
+	}
+
+	msgs, err := r.Amqp.Listen(q.Name)
 	if err != nil {
 		return nil, err
 	}

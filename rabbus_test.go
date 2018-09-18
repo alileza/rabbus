@@ -203,6 +203,7 @@ func testFailToCreateNewListenerWhenCreateConsumerReturnsError(t *testing.T) {
 	provider.createConsumerFn = func(exchange, key, kind, queue string, durable bool) (<-chan amqp.Delivery, error) {
 		return nil, errAmqp
 	}
+
 	r, err := New(dsn, AmqpProvider(provider))
 	if err != nil {
 		t.Fatalf("expected to create new rabbus, got %s", err.Error())
@@ -452,7 +453,11 @@ func (m *amqpMock) CreateConsumer(exchange, key, kind, queue string, durable boo
 }
 
 func (m *amqpMock) Listen(queue string) (<-chan amqp.Delivery, error) {
-	return nil, nil
+	m.createConsumerInvoked = true
+	return m.createConsumerFn("exchange", "key", ExchangeDirect, "queue", true)
+}
+func (m *amqpMock) QueueDeclare(queue string, durable bool) (amqp.Queue, error) {
+	return amqp.Queue{}, nil
 }
 
 func (m *amqpMock) BindQueue(queue, exchange, key string) error {

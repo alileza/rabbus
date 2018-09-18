@@ -60,6 +60,17 @@ func (ai *Amqp) BindQueue(queue, exchange, key string) error {
 	return ch.QueueBind(queue, key, exchange, false, nil)
 }
 
+// QueueDeclare declare a new queue
+func (ai *Amqp) QueueDeclare(queue string, durable bool) (amqp.Queue, error) {
+	ch, err := ai.conn.Channel()
+	if err != nil {
+		return amqp.Queue{}, err
+	}
+	defer ch.Close()
+
+	return ch.QueueDeclare(queue, durable, false, false, false, nil)
+}
+
 // Listen listen to messages to a given queue
 func (ai *Amqp) Listen(queue string) (<-chan amqp.Delivery, error) {
 	ch, err := ai.conn.Channel()
